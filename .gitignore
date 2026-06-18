@@ -1,0 +1,9 @@
+node_modules/
+out/
+.venv/
+__pycache__/
+*.pyc
+*.js.map
+.vscode-test/
+*.db
+.DS_Store
