@@ -1,0 +1,10 @@
+{
+  "np": {"module": "numpy", "importStyle": "alias", "fullImport": "import numpy as np"},
+  "pd": {"module": "pandas", "importStyle": "alias", "fullImport": "import pandas as pd"},
+  "plt": {"module": "matplotlib.pyplot", "importStyle": "alias", "fullImport": "import matplotlib.pyplot as plt"},
+  "tf": {"module": "tensorflow", "importStyle": "alias", "fullImport": "import tensorflow as tf"},
+  "sns": {"module": "seaborn", "importStyle": "alias", "fullImport": "import seaborn as sns"},
+  "cv2": {"module": "cv2", "importStyle": "import", "fullImport": "import cv2"},
+  "sk": {"module": "sklearn", "importStyle": "alias", "fullImport": "import sklearn as sk"},
+  "sp": {"module": "scipy", "importStyle": "alias", "fullImport": "import scipy as sp"}
+}
