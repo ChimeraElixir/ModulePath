@@ -115,6 +115,11 @@ class SidecarServer:
         if cached_version == version and self.index.is_package_indexed(name):
             return
 
+        # Emit progress
+        progress_msg = json.dumps({'cmd': 'progress', 'message': f'Parsing {name}'})
+        sys.stdout.write(progress_msg + '\n')
+        sys.stdout.flush()
+
         symbols = []
         if path:
             symbols = self.resolver.resolve(path, name)

@@ -10,6 +10,8 @@ import {
 export class PythonProvider implements LanguageProvider {
     readonly languageId = 'python';
     private sidecar: SidecarClient | null = null;
+    private progressResolve: (() => void) | undefined;
+    private progressReporter: vscode.Progress<{ message?: string }> | undefined;
     private extensionPath: string;
     private storagePath: string;
 
@@ -28,7 +30,26 @@ export class PythonProvider implements LanguageProvider {
             projectRoot,
             (status) => {
                 vscode.window.setStatusBarMessage(`ModulePath: ${status}`);
+                if (status.includes('✅') && this.progressResolve) {
+                    this.progressResolve();
+                    this.progressResolve = undefined;
+                    this.progressReporter = undefined;
+                }
             },
+            (message) => {
+                if (!this.progressResolve) {
+                    vscode.window.withProgress({
+                        location: vscode.ProgressLocation.Window,
+                        title: "ModulePath Indexing",
+                    }, (progress) => {
+                        this.progressReporter = progress;
+                        return new Promise<void>(resolve => {
+                            this.progressResolve = resolve;
+                        });
+                    });
+                }
+                this.progressReporter?.report({ message });
+            }
         );
 
         await this.sidecar.start();

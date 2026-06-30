@@ -1,4 +1,3 @@
-# tests/sidecar/test_main.py
 import json
 import subprocess
 import sys
@@ -38,3 +37,27 @@ def test_search_returns_results_format():
     assert result["cmd"] == "search"
     assert "results" in result
     assert isinstance(result["results"], list)
+
+def test_sidecar_emits_progress_events(capsys, tmp_path):
+    # Ensure python-sidecar is in sys.path so 'from main import SidecarServer' works
+    import sys
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'python-sidecar'))
+    from main import SidecarServer
+    import json
+    server = SidecarServer(db_path=str(tmp_path / "test.db"))
+    
+    # Fake package to index
+    pkg = {"name": "testpkg", "version": "1.0", "source": "third-party"}
+    server._index_package(pkg)
+    
+    captured = capsys.readouterr()
+    found_progress = False
+    for line in captured.out.splitlines():
+        if not line.strip(): continue
+        try:
+            msg = json.loads(line)
+            if msg.get("cmd") == "progress" and "testpkg" in msg.get("message", ""):
+                found_progress = True
+        except:
+            pass
+    assert found_progress, "No progress event emitted for testpkg"

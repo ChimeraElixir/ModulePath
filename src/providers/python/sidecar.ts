@@ -29,17 +29,20 @@ export class SidecarClient {
     private restartAttempts = 0;
     private maxRestartAttempts = 3;
     private onStatusChange: (status: string) => void;
+    private onProgress: (message: string) => void;
 
     constructor(
         extensionPath: string,
         storagePath: string,
         projectRoot: string,
         onStatusChange: (status: string) => void,
+        onProgress: (message: string) => void,
     ) {
         this.sidecarPath = path.join(extensionPath, 'python-sidecar', 'main.py');
         this.dbPath = path.join(storagePath, 'index.db');
         this.projectRoot = projectRoot;
         this.onStatusChange = onStatusChange;
+        this.onProgress = onProgress;
     }
 
     async start(): Promise<void> {
@@ -106,6 +109,11 @@ export class SidecarClient {
             const symCount = response.symbols || 0;
             this.onStatusChange(`✅ ${symCount} symbols`);
             return;
+        }
+        
+        if (response.cmd === 'progress' && response.message) {
+            this.onProgress(response.message);
+            return; // Progress events don't have callbacks
         }
 
         // Route response to first waiting callback
