@@ -205,10 +205,22 @@ function findFirstCodeLine(lines: string[]): number {
 }
 
 export function formatImportStatement(match: SymbolMatch): string {
-    if (match.importStyle === 'alias' && match.alias) {
+    const config = vscode.workspace.getConfiguration('modulepath');
+    const styleSetting = config.get<string>('importStyle', 'auto');
+
+    let effectiveStyle = match.importStyle;
+    
+    // Override if setting says so
+    if (styleSetting === 'direct' && match.type !== 'module') {
+        effectiveStyle = 'from';
+    } else if (styleSetting === 'absolute' && match.type !== 'module') {
+        effectiveStyle = 'import';
+    }
+
+    if (effectiveStyle === 'alias' && match.alias) {
         return `import ${match.module} as ${match.alias}`;
     }
-    if (match.importStyle === 'import') {
+    if (effectiveStyle === 'import') {
         return `import ${match.module}`;
     }
     return `from ${match.module} import ${match.symbol}`;

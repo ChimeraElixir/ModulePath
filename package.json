@@ -54,6 +54,12 @@
           "default": true,
           "description": "Merge imports from same module onto one line."
         },
+        "modulepath.importStyle": {
+          "type": "string",
+          "enum": ["auto", "direct", "absolute"],
+          "default": "auto",
+          "description": "Preferred import style. 'auto' uses default, 'direct' uses 'from module import symbol', 'absolute' uses 'import module'."
+        },
         "modulepath.runtimeFallbackTimeout": {
           "type": "number",
           "default": 2,

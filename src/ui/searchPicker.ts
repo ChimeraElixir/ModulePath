@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { SymbolMatch } from '../providers/provider';
+import { LanguageProvider, SymbolMatch } from '../providers/provider';
 import { ProviderManager } from '../providers/manager';
 
 class SymbolQuickPickItem implements vscode.QuickPickItem {
@@ -8,18 +8,12 @@ class SymbolQuickPickItem implements vscode.QuickPickItem {
     detail: string;
     match: SymbolMatch;
 
-    constructor(match: SymbolMatch) {
+    constructor(match: SymbolMatch, provider: LanguageProvider) {
         this.match = match;
         this.label = `$(symbol-${this.getIcon(match.type)}) ${match.symbol}`;
         this.description = `${match.type}  ·  ${match.module}`;
 
-        const importStmt =
-            match.importStyle === 'alias' && match.alias
-                ? `import ${match.module} as ${match.alias}`
-                : match.importStyle === 'import'
-                    ? `import ${match.module}`
-                    : `from ${match.module} import ${match.symbol}`;
-
+        const importStmt = provider.formatImportStatement(match);
         this.detail = `→ ${importStmt}`;
     }
 
@@ -89,7 +83,7 @@ export async function showSearchPicker(
             quickPick.busy = true;
             try {
                 const results = await provider.search(value, 20);
-                quickPick.items = results.map((r) => new SymbolQuickPickItem(r));
+                quickPick.items = results.map((r) => new SymbolQuickPickItem(r, provider));
             } catch {
                 quickPick.items = [];
             }
@@ -102,7 +96,7 @@ export async function showSearchPicker(
         quickPick.busy = true;
         try {
             const results = await provider.search(prefilledQuery, 20);
-            quickPick.items = results.map((r) => new SymbolQuickPickItem(r));
+            quickPick.items = results.map((r) => new SymbolQuickPickItem(r, provider));
         } catch {
             quickPick.items = [];
         }
